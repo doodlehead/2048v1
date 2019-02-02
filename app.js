@@ -3,10 +3,8 @@ window.onload = () => {
     //Canvas stuff
     let c = document.getElementById("board");
 
-    let game = new Game(300, 4, c);
-    game.drawGrid();
-    game.initializeBoard();
-    game.drawTiles();
+    let game = new Game(400, 4, c);
+    game.start();
 
     window.addEventListener("keydown", function (e) {
         console.log("keypressed");
@@ -32,8 +30,14 @@ class Game {
         []];
     }
 
+    start() {
+        this.initializeBoard();
+        this.drawTiles();
+        this.drawGrid();
+    }
+
     initializeBoard() {
-        this.ctx.font = "30px Arial";
+        this.ctx.font = "bold 40px Arial";
 
         for (let x = 0; x < this.numSquares; x++) {
             let row = [];
@@ -51,26 +55,49 @@ class Game {
     }
 
     drawGrid() {
+        this.ctx.strokeStyle = "#B9AB9E";
         let squareSize = this.size / this.numSquares;
         for (let i = 1; i < this.numSquares; i++) {
             //Vertical lines
             this.ctx.moveTo(0, squareSize * i);
             this.ctx.lineTo(this.size, squareSize * i);
+            this.ctx.lineWidth = 6;
             this.ctx.stroke();
             //Horizontal lines
             this.ctx.moveTo(squareSize * i, 0);
             this.ctx.lineTo(squareSize * i, this.size);
+            this.ctx.lineWidth = 6;
             this.ctx.stroke();
         }
     }
 
     drawTiles() {
+        const colors = {
+            0: "#CCBFB3",
+            2: "#EDE3D9",
+            4: "#ECDFC6",
+            8: "#F0AF78",
+            16: "#F29363",
+            32: "#F37A5F",
+            64: "#F35C3C",
+            128: "#EBCD71",
+            256: "#EACA61",
+            512: "#EAC651",
+            1024: "#EAC341",
+            2048: "#EDC22E"
+        };
+
+        this.ctx.textAlign = "center";
+
         let squareSize = this.size / this.numSquares;
         let midpoint = squareSize / 2;
         for (let y = 0; y < this.numSquares; y++) {
             for (let x = 0; x < this.numSquares; x++) {
+                this.ctx.fillStyle = colors[this.board[y][x]];
+                this.ctx.fillRect(x*squareSize, y*squareSize, squareSize, squareSize);
+                this.ctx.fillStyle = "#766E65";
                 this.ctx.fillText(this.board[y][x], midpoint + x * squareSize,
-                    midpoint + y * squareSize);
+                    midpoint + y * squareSize + 15);
             }
         }
     }
@@ -137,23 +164,19 @@ class Game {
         switch (direction) {
             case 0:
                 return [x, y-1];
-                break;
             case 1:
                 return [x+1, y];
-                break;
             case 2:
                 return [x, y+1];
-                break;
             case 3:
                 return [x-1, y];
-                break;
         }
     }
 
     redraw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawGrid();
         this.drawTiles();
+        this.drawGrid();
     }
 
     spawnRandom(value) {
