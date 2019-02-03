@@ -102,6 +102,7 @@ class Game {
         }
     }
 
+    //TODO: refactor this to make it prettier/more efficient?
     doMove(move) {
         console.log(`doing move: ${move}`)
         if (move === 0) { //Up
@@ -109,18 +110,36 @@ class Game {
                 for (let y = 0; y < this.numSquares; y++) {
                     if(!(this.board[y][x] === 0)) {
                         this.pack(x, y, move);
-                    }   
+                    }
                 }
             }
         }
         else if (move === 1) { //Right
-            
+            for (let y = 0; y < this.numSquares; y++) {
+                for (let x = this.numSquares-1; x >= 0; x--) {
+                    if(!(this.board[y][x] === 0)) {
+                        this.pack(x, y, move);
+                    }
+                }
+            }
         }
         else if (move === 2) { //Down
-
+            for (let x = 0; x < this.numSquares; x++) {
+                for (let y = this.numSquares-1; y >= 0; y--) {
+                    if(!(this.board[y][x] === 0)) {
+                        this.pack(x, y, move);
+                    }   
+                }
+            }
         }
         else if (move === 3) { //Left
-
+            for (let y = 0; y < this.numSquares; y++) {
+                for (let x = 0; x < this.numSquares; x++) {
+                    if(!(this.board[y][x] === 0)) {
+                        this.pack(x, y, move);
+                    }
+                }
+            }
         }
         else {
             console.log(`Error: invalid move: ${move}`);
@@ -129,13 +148,14 @@ class Game {
         this.spawnRandom();
     }
 
-    //Merges a and b into a
+    //Merges (a + b) into a
     merge(a, b) {
-        if (this.board[by][bx] === 0) {
-            return; //Nothing to merge, move on
-        }
-        else {
-
+        //Validate
+        let val1 = this.board[a[1]][a[0]];
+        let val2 = this.board[b[1]][b[0]];
+        if (val1 === val2) {
+            this.board[b[1]][b[0]] = val1+val2;
+            this.board[a[1]][a[0]] = 0;
         }
     }
 
@@ -179,8 +199,17 @@ class Game {
         this.drawGrid();
     }
 
-    spawnRandom(value) {
+    spawnRandom() {
+        let coords = [this.getRandomNum(0, this.numSquares), this.getRandomNum(0, this.numSquares)];
+        while(!(this.board[coords[1]][coords[0]] === 0)) {
+            coords = [this.getRandomNum(0, this.numSquares), this.getRandomNum(0, this.numSquares)];
+        }
+        this.board[coords[1]][coords[0]] = 2;
+        this.redraw();
+    }
 
+    getRandomNum(min, max) {
+        return Math.floor(Math.random()*(max-min) + min);
     }
 
 }
