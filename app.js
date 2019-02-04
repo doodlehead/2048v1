@@ -1,21 +1,38 @@
 
 window.onload = () => {
     //Canvas stuff
-    let c = document.getElementById("board");
+    let canvas = document.getElementById("js-board");
+    let exportBtn = document.getElementById("js-export");
+    let loadBtn = document.getElementById("js-load");
+    let textbox = document.getElementById("js-textbox")
 
-    let game = new Game(400, 4, c);
+    let game = new Game(600, 5, canvas);
     game.start();
 
-    window.addEventListener("keydown", function (e) {
-        console.log("keypressed");
-        const controlKeys = ["ArrowUp", "ArrowRight", "ArrowDown", "ArrowLeft"];
+    let inEventTrigger = false;
 
-        if (controlKeys.includes(e.key)) {
-            let index = controlKeys.indexOf(e.key);
-            //Execute the move
-            game.doMove(index);
+    window.addEventListener("keydown", function (e) {
+        //Throttle the input to one per 200 ms
+        if(!inEventTrigger) {
+            const controlKeys = ["ArrowUp", "ArrowRight", "ArrowDown", "ArrowLeft"];
+            if (controlKeys.includes(e.key)) {
+                let index = controlKeys.indexOf(e.key);
+                //Execute the move
+                game.doMove(index);
+            }
+
+            inEventTrigger = true;
+            setTimeout(() => inEventTrigger = false, 50);
         }
     });
+
+    exportBtn.addEventListener("click", function() {
+        textbox.value = JSON.stringify(game.board);
+    });
+    loadBtn.addEventListener("click", function() {
+        game.setBoard(JSON.parse(textbox.value));
+    });
+    
 }
 
 class Game {
@@ -27,6 +44,7 @@ class Game {
 
         this.board = [];
         this.baseStates = [[[1, 1], [2, 2]],
+        [[1, 1], [3, 3]],
         []];
     }
 
@@ -52,6 +70,11 @@ class Game {
             let coord = initial[x];
             this.board[coord[0]][coord[1]] = 2;
         }
+    }
+
+    setBoard(newBoard) {
+        this.board = newBoard;
+        this.redraw();
     }
 
     drawGrid() {
@@ -104,7 +127,10 @@ class Game {
 
     //TODO: refactor this to make it prettier/more efficient?
     doMove(move) {
-        console.log(`doing move: ${move}`)
+        //console.log(`doing move: ${move}`)
+        let d = new Date();
+        let start = d.getTime();
+
         if (move === 0) { //Up
             for (let x = 0; x < this.numSquares; x++) {
                 for (let y = 0; y < this.numSquares; y++) {
@@ -146,6 +172,10 @@ class Game {
         }
         this.redraw();
         this.spawnRandom();
+
+        d = new Date();
+        let elapsed = d.getTime() - start;
+        console.log(`doMove took ${elapsed} ms`)
     }
 
     //Merges (a + b) into a
@@ -199,13 +229,30 @@ class Game {
         this.drawGrid();
     }
 
-    spawnRandom() {
-        let coords = [this.getRandomNum(0, this.numSquares), this.getRandomNum(0, this.numSquares)];
-        while(!(this.board[coords[1]][coords[0]] === 0)) {
-            coords = [this.getRandomNum(0, this.numSquares), this.getRandomNum(0, this.numSquares)];
+    getEmptySpaces() {
+        let empty = [];
+        for (let y = 0; y < this.numSquares; y++) {
+            for (let x = 0; x < this.numSquares; x++) {
+                if(this.board[y][x] === 0) {
+                    empty.push([x, y]);
+                }
+            }
         }
-        this.board[coords[1]][coords[0]] = 2;
+        return empty;
+    }
+
+    spawnRandom() {
+        let d = new Date();
+        let start = d.getTime();
+
+        let emptySpaces = this.getEmptySpaces();
+        let rand = emptySpaces[this.getRandomNum(0, emptySpaces.length)];
+        this.board[rand[1]][rand[0]] = 2;
         this.redraw();
+
+        d = new Date();
+        let elapsed = d.getTime() - start;
+        console.log(`spawnRandom() took ${elapsed} ms`);
     }
 
     getRandomNum(min, max) {
