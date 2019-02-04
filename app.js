@@ -1,3 +1,4 @@
+'use strict';
 
 window.onload = () => {
     //Canvas stuff
@@ -11,8 +12,10 @@ window.onload = () => {
 
     let inEventTrigger = false;
 
-    window.addEventListener("keydown", function (e) {
-        //Throttle the input to one per 200 ms
+    console.log("happen once right?");
+
+    window.addEventListener("keydown", function (e) {    
+        //Throttle the input to one per 50 ms
         if(!inEventTrigger) {
             const controlKeys = ["ArrowUp", "ArrowRight", "ArrowDown", "ArrowLeft"];
             if (controlKeys.includes(e.key)) {
@@ -46,6 +49,20 @@ class Game {
         this.baseStates = [[[1, 1], [2, 2]],
         [[1, 1], [3, 3]],
         []];
+        this.colors = {
+            0: "#CCBFB3",
+            2: "#EDE3D9",
+            4: "#ECDFC6",
+            8: "#F0AF78",
+            16: "#F29363",
+            32: "#F37A5F",
+            64: "#F35C3C",
+            128: "#EBCD71",
+            256: "#EACA61",
+            512: "#EAC651",
+            1024: "#EAC341",
+            2048: "#EDC22E"
+        };
     }
 
     start() {
@@ -78,6 +95,7 @@ class Game {
     }
 
     drawGrid() {
+        this.ctx.beginPath();
         this.ctx.strokeStyle = "#B9AB9E";
         let squareSize = this.size / this.numSquares;
         for (let i = 1; i < this.numSquares; i++) {
@@ -95,28 +113,13 @@ class Game {
     }
 
     drawTiles() {
-        const colors = {
-            0: "#CCBFB3",
-            2: "#EDE3D9",
-            4: "#ECDFC6",
-            8: "#F0AF78",
-            16: "#F29363",
-            32: "#F37A5F",
-            64: "#F35C3C",
-            128: "#EBCD71",
-            256: "#EACA61",
-            512: "#EAC651",
-            1024: "#EAC341",
-            2048: "#EDC22E"
-        };
-
         this.ctx.textAlign = "center";
 
         let squareSize = this.size / this.numSquares;
         let midpoint = squareSize / 2;
         for (let y = 0; y < this.numSquares; y++) {
             for (let x = 0; x < this.numSquares; x++) {
-                this.ctx.fillStyle = colors[this.board[y][x]];
+                this.ctx.fillStyle = this.colors[this.board[y][x]];
                 this.ctx.fillRect(x*squareSize, y*squareSize, squareSize, squareSize);
                 this.ctx.fillStyle = "#766E65";
                 this.ctx.fillText(this.board[y][x], midpoint + x * squareSize,
